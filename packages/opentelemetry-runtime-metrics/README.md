@@ -1,11 +1,11 @@
-#OpenTelemetry RCA Metrics for Node.js
+#OpenTelemetry Runtime Metrics for Node.js
 [![Gitter chat][gitter-image]][gitter-url]
 [![NPM Published Version][npm-img]][npm-url]
 [![dependencies][dependencies-image]][dependencies-url]
 [![devDependencies][devDependencies-image]][devDependencies-url]
 [![Apache License][license-image]][license-url]
 
-This module provides automatic collection of RCA Metrics
+This module provides automatic collection of Runtime Metrics
 
 ## Installation
 
