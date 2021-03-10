@@ -35,6 +35,9 @@ import {
   GrpcInstrumentation,
   // GrpcInstrumentationConfig,
 } from '@opentelemetry/instrumentation-grpc';
+import {
+  GrpcInstrumentationConfig,
+} from '@opentelemetry/instrumentation-grpc/build/src/types';
 import { KoaInstrumentation } from '@opentelemetry/instrumentation-koa';
 // import {
 //   MySQLInstrumentation,
@@ -61,91 +64,85 @@ import {
   InstrumentationConfig,
 } from '@opentelemetry/instrumentation';
 
-type InstrumentationMapKeys =
-  | '@opentelemetry/instrumentation-dns'
-  | '@opentelemetry/instrumentation-express'
-  | '@opentelemetry/instrumentation-http'
-  | '@opentelemetry/instrumentation-graphql'
-  | '@opentelemetry/instrumentation-grpc'
-  | '@opentelemetry/instrumentation-koa'
-  | '@opentelemetry/instrumentation-ioredis'
-  | '@opentelemetry/instrumentation-express'
-  | '@opentelemetry/instrumentation-mongodb'
-  // | '@opentelemetry/instrumentation-mysql'
-  | '@opentelemetry/instrumentation-pg';
-// | '@opentelemetry/instrumentation-redis'
+const InstrumentationMap = {
+  '@opentelemetry/instrumentation-dns': {
+    instrumentation: DnsInstrumentation,
+    config: { enabled: true } as DnsInstrumentationConfig,
+  },
+  '@opentelemetry/instrumentation-express': {
+    instrumentation: ExpressInstrumentation,
+    config: { enabled: true } as ExpressInstrumentationConfig,
+  },
+  '@opentelemetry/instrumentation-http': {
+    instrumentation: HttpInstrumentation,
+    config: { enabled: true } as HttpInstrumentationConfig,
+  },
+  '@opentelemetry/instrumentation-graphql': {
+    instrumentation: GraphQLInstrumentation,
+    config: { enabled: true } as GraphQLInstrumentationConfig,
+  },
+  '@opentelemetry/instrumentation-grpc': {
+    instrumentation: GrpcInstrumentation,
+    config: { enabled: true } as GrpcInstrumentationConfig,
+  },
+  '@opentelemetry/instrumentation-koa': {
+    instrumentation: KoaInstrumentation,
+    config: { enabled: true } as InstrumentationConfig, // TODO no koa config type?
+  },
+  '@opentelemetry/instrumentation-ioredis': {
+    instrumentation: IORedisInstrumentation,
+    config: { enabled: true } as IORedisInstrumentationConfig,
+  },
+  '@opentelemetry/instrumentation-mongodb': {
+    instrumentation: MongoDBInstrumentation,
+    config: { enabled: true } as MongoDBInstrumentationConfig,
+  },
+  // '@opentelemetry/instrumentation-mysql': {
+  //   instrumentation: MySQLInstrumentation,
+  //   config: { enabled: true } as MySQLInstrumentationConfig,
+  // },
+  '@opentelemetry/instrumentation-pg': {
+    instrumentation: PgInstrumentation,
+    config: { enabled: true } as PgInstrumentationConfig,
+  },
+  // '@opentelemetry/instrumentation-redis': {
+  //   instrumentation: RedisInstrumentation,
+  //   config: { enabled: true } as RedisInstrumentationConfig,
+  // },
+}
 
 type InstrumentationConfigMap = {
-  '@opentelemetry/instrumentation-dns'?: DnsInstrumentationConfig;
-  '@opentelemetry/instrumentation-express'?: ExpressInstrumentationConfig;
-  '@opentelemetry/instrumentation-http'?: HttpInstrumentationConfig;
-  '@opentelemetry/instrumentation-graphql'?: GraphQLInstrumentationConfig &
-    InstrumentationConfig;
-  // '@opentelemetry/instrumentation-grpc'?: GrpcInstrumentationConfig;
-  '@opentelemetry/instrumentation-grpc'?: InstrumentationConfig;
-  '@opentelemetry/instrumentation-koa'?: InstrumentationConfig;
-  '@opentelemetry/instrumentation-ioredis'?: IORedisInstrumentationConfig;
-  '@opentelemetry/instrumentation-mongodb'?: MongoDBInstrumentationConfig;
-  // '@opentelemetry/instrumentation-mysql'?: MysqlInstrumentationConfig,
-  '@opentelemetry/instrumentation-pg'?: PgInstrumentationConfig;
-  // '@opentelemetry/instrumentation-redis'?: RedisInstrumentationConfig,
-};
-
-const InstrumentationMap: Record<InstrumentationMapKeys, any> = {
-  '@opentelemetry/instrumentation-dns': DnsInstrumentation,
-  '@opentelemetry/instrumentation-express': ExpressInstrumentation,
-  '@opentelemetry/instrumentation-http': HttpInstrumentation,
-  '@opentelemetry/instrumentation-graphql': GraphQLInstrumentation,
-  '@opentelemetry/instrumentation-grpc': GrpcInstrumentation,
-  '@opentelemetry/instrumentation-koa': KoaInstrumentation,
-  '@opentelemetry/instrumentation-ioredis': IORedisInstrumentation,
-  '@opentelemetry/instrumentation-mongodb': MongoDBInstrumentation,
-  // '@opentelemetry/instrumentation-mysql': MySQLInstrumentation,
-  '@opentelemetry/instrumentation-pg': PgInstrumentation,
-  // '@opentelemetry/instrumentation-redis': RedisInstrumentation,
-};
-
-const defaultConfigs: InstrumentationConfigMap = {
-  '@opentelemetry/instrumentation-dns': { enabled: true },
-  '@opentelemetry/instrumentation-express': { enabled: true },
-  '@opentelemetry/instrumentation-http': { enabled: true },
-  '@opentelemetry/instrumentation-graphql': { enabled: true },
-  '@opentelemetry/instrumentation-grpc': { enabled: true },
-  '@opentelemetry/instrumentation-koa': { enabled: true },
-  '@opentelemetry/instrumentation-ioredis': { enabled: true },
-  '@opentelemetry/instrumentation-mongodb': { enabled: true },
-  // '@opentelemetry/instrumentation-mysql': { enabled: true },
-  '@opentelemetry/instrumentation-pg': { enabled: true },
-  // '@opentelemetry/instrumentation-redis': { enabled: true }
+  [Name in keyof typeof InstrumentationMap]?: typeof InstrumentationMap[Name]["config"]
 };
 
 export function getNodeAutoInstrumentations(
   inputConfigs: InstrumentationConfigMap = {}
 ): Instrumentation[] {
-  const configs: InstrumentationConfigMap = Object.assign(
-    {},
-    defaultConfigs,
-    inputConfigs
-  );
-  const keys = Object.keys(configs);
-  const instrumentations: Instrumentation[] = [];
-  keys.forEach(key => {
-    const Instance = InstrumentationMap[key as keyof InstrumentationConfigMap];
-    const config = configs[key as keyof InstrumentationConfigMap];
-    if (Instance) {
-      try {
-        if (config?.enabled === false) {
-          diag.debug(`Disabling instrumentation for ${key}`);
-        } else {
-          diag.debug(`Loading instrumentation for ${key}`);
-          instrumentations.push(new Instance(config));
-        }
-      } catch (e) {
-        diag.error(e);
-      }
-    } else {
-      diag.error(`Provided instrumentation name "${key}" not found`);
+  for (const name of Object.keys(inputConfigs)) {
+    if (!InstrumentationMap.hasOwnProperty(name)) {
+      diag.error(`Provided instrumentation name "${name}" not found`);
+      continue;
     }
-  });
+  }
+
+  const instrumentations: Instrumentation[] = [];
+
+  for (const name of Object.keys(InstrumentationMap) as Array<keyof typeof InstrumentationMap>) {
+    const Instance = InstrumentationMap[name].instrumentation;
+
+    const userConfig = inputConfigs[name] ?? { enabled: true };
+
+    if (userConfig.enabled === false) {
+      diag.debug(`Disabling instrumentation for ${name}`);
+      continue;
+    }
+
+    try {
+      instrumentations.push(new Instance(userConfig as any))
+    } catch (e) {
+      diag.error(e);
+    }
+  }
+
   return instrumentations;
 }
