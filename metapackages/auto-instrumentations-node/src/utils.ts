@@ -35,9 +35,7 @@ import {
   GrpcInstrumentation,
   // GrpcInstrumentationConfig,
 } from '@opentelemetry/instrumentation-grpc';
-import {
-  GrpcInstrumentationConfig,
-} from '@opentelemetry/instrumentation-grpc/build/src/types';
+import { GrpcInstrumentationConfig } from '@opentelemetry/instrumentation-grpc/build/src/types';
 import { KoaInstrumentation } from '@opentelemetry/instrumentation-koa';
 // import {
 //   MySQLInstrumentation,
@@ -109,17 +107,17 @@ const InstrumentationMap = {
   //   instrumentation: RedisInstrumentation,
   //   config: { enabled: true } as RedisInstrumentationConfig,
   // },
-}
+};
 
 type InstrumentationConfigMap = {
-  [Name in keyof typeof InstrumentationMap]?: typeof InstrumentationMap[Name]["config"]
+  [Name in keyof typeof InstrumentationMap]?: typeof InstrumentationMap[Name]['config'];
 };
 
 export function getNodeAutoInstrumentations(
   inputConfigs: InstrumentationConfigMap = {}
 ): Instrumentation[] {
   for (const name of Object.keys(inputConfigs)) {
-    if (!InstrumentationMap.hasOwnProperty(name)) {
+    if (!Object.prototype.hasOwnProperty.call(InstrumentationMap, name)) {
       diag.error(`Provided instrumentation name "${name}" not found`);
       continue;
     }
@@ -127,7 +125,9 @@ export function getNodeAutoInstrumentations(
 
   const instrumentations: Instrumentation[] = [];
 
-  for (const name of Object.keys(InstrumentationMap) as Array<keyof typeof InstrumentationMap>) {
+  for (const name of Object.keys(InstrumentationMap) as Array<
+    keyof typeof InstrumentationMap
+  >) {
     const Instance = InstrumentationMap[name].instrumentation;
 
     const userConfig = inputConfigs[name] ?? { enabled: true };
@@ -138,7 +138,7 @@ export function getNodeAutoInstrumentations(
     }
 
     try {
-      instrumentations.push(new Instance(userConfig as any))
+      instrumentations.push(new Instance(userConfig as any));
     } catch (e) {
       diag.error(e);
     }
