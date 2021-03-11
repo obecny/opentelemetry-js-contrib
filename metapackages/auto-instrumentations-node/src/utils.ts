@@ -15,9 +15,7 @@
  */
 
 import { diag } from '@opentelemetry/api';
-import {
-  Instrumentation,
-} from '@opentelemetry/instrumentation';
+import { Instrumentation } from '@opentelemetry/instrumentation';
 import { DnsInstrumentation } from '@opentelemetry/instrumentation-dns';
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql';
@@ -29,7 +27,6 @@ import { MongoDBInstrumentation } from '@opentelemetry/instrumentation-mongodb';
 import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 // import { MySQLInstrumentation } from '@opentelemetry/instrumentation-mysql';
 // import { RedisInstrumentation } from '@opentelemetry/instrumentation-redis';
-
 
 const InstrumentationMap = {
   '@opentelemetry/instrumentation-dns': DnsInstrumentation,
