@@ -75,6 +75,7 @@ export function getNodeAutoInstrumentations(
     }
 
     try {
+      diag.debug(`Loading instrumentation for ${name}`);
       instrumentations.push(new Instance(userConfig));
     } catch (e) {
       diag.error(e);
