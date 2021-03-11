@@ -130,7 +130,11 @@ export function getNodeAutoInstrumentations(
   >) {
     const Instance = InstrumentationMap[name].instrumentation;
 
-    const userConfig = inputConfigs[name] ?? InstrumentationMap[name].config;
+    const userConfig = Object.assign(
+      Object.create(null),
+      InstrumentationMap[name].config,
+      inputConfigs[name]
+    );
 
     if (userConfig.enabled === false) {
       diag.debug(`Disabling instrumentation for ${name}`);
